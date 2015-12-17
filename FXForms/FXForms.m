@@ -171,7 +171,7 @@ static inline void FXFormLabelSetMinFontSize(UILabel *label, CGFloat fontSize)
 static inline NSArray *FXFormProperties(id<FXForm> form)
 {
     if (!form) return nil;
-
+    
     static void *FXFormPropertiesKey = &FXFormPropertiesKey;
     NSMutableArray *properties = objc_getAssociatedObject(form, FXFormPropertiesKey);
     if (!properties)
@@ -216,7 +216,7 @@ static inline NSArray *FXFormProperties(id<FXForm> form)
                         continue;
                     }
                 }
-
+                
                 //get property type
                 Class valueClass = nil;
                 NSString *valueType = nil;
@@ -288,7 +288,7 @@ static inline NSArray *FXFormProperties(id<FXForm> form)
                     }
                 }
                 free(typeEncoding);
- 
+                
                 //add to properties
                 NSMutableDictionary *inferred = [NSMutableDictionary dictionaryWithObject:key forKey:FXFormFieldKey];
                 if (valueClass) inferred[FXFormFieldClass] = valueClass;
@@ -510,29 +510,29 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
     {
         dictionary[FXFormFieldClass] = valueClass;
     }
-  
+    
     //get default value
     id defaultValue = dictionary[FXFormFieldDefaultValue];
     if (defaultValue)
     {
         if ([valueClass isSubclassOfClass:[NSArray class]] && ![defaultValue isKindOfClass:[NSArray class]])
         {
-          //workaround for common mistake where type is collection, but default value is a single value
-          defaultValue = [valueClass arrayWithObject:defaultValue];
+            //workaround for common mistake where type is collection, but default value is a single value
+            defaultValue = [valueClass arrayWithObject:defaultValue];
         }
         else if ([valueClass isSubclassOfClass:[NSSet class]] && ![defaultValue isKindOfClass:[NSSet class]])
         {
-          //as above, but for NSSet
-          defaultValue = [valueClass setWithObject:defaultValue];
+            //as above, but for NSSet
+            defaultValue = [valueClass setWithObject:defaultValue];
         }
         else if ([valueClass isSubclassOfClass:[NSOrderedSet class]] && ![defaultValue isKindOfClass:[NSOrderedSet class]])
         {
-          //as above, but for NSOrderedSet
-          defaultValue = [valueClass orderedSetWithObject:defaultValue];
+            //as above, but for NSOrderedSet
+            defaultValue = [valueClass orderedSetWithObject:defaultValue];
         }
         dictionary[FXFormFieldDefaultValue] = defaultValue;
     }
-  
+    
     //get field type
     NSString *key = dictionary[FXFormFieldKey];
     if (!type)
@@ -572,7 +572,7 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
     {
         dictionary[FXFormFieldHeader] = @"";
     }
-
+    
     //convert footer from string to class
     id footer = dictionary[FXFormFieldFooter];
     if ([footer isKindOfClass:[NSString class]])
@@ -608,7 +608,7 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
         NSString *keyOrAction = key;
         if (!keyOrAction && [dictionary[FXFormFieldAction] isKindOfClass:[NSString class]])
         {
-          keyOrAction = dictionary[FXFormFieldAction];
+            keyOrAction = dictionary[FXFormFieldAction];
         }
         NSMutableString *output = nil;
         if (keyOrAction)
@@ -635,6 +635,7 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
 @interface FXFormController () <UITableViewDataSource, UITableViewDelegate>
 
 @property (nonatomic, copy) NSArray *sections;
+@property (nonatomic, strong) NSCache *cellsCache;
 @property (nonatomic, strong) NSMutableDictionary *cellHeightCache;
 @property (nonatomic, strong) NSMutableDictionary *cellClassesForFieldTypes;
 @property (nonatomic, strong) NSMutableDictionary *cellClassesForFieldClasses;
@@ -863,7 +864,7 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
                 return [self.placeholder fieldDescription];
             }
         }
-      
+        
         if ([self isCollectionType])
         {
             id value = self.value;
@@ -889,11 +890,11 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
             {
                 NSMutableArray *options = [NSMutableArray array];
                 for (id option in value) {
-                  [options addObject:self.valueTransformer(option)];
+                    [options addObject:self.valueTransformer(option)];
                 }
                 value = [options count]? options: nil;
             }
-          
+            
             return [value fieldDescription] ?: [self.placeholder fieldDescription];
         }
         else if ([self.type isEqual:FXFormFieldTypeBitfield])
@@ -1016,7 +1017,7 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
             //handle case where value is numeric but value class is string
             value = [value description];
         }
-      
+        
         if (self.valueClass == [NSMutableString class])
         {
             //replace string or make mutable copy of it
@@ -1031,7 +1032,7 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
                 value = [NSMutableString stringWithString:value];
             }
         }
-      
+        
         if (!value)
         {
             for (NSDictionary *field in FXFormProperties(self.form))
@@ -1166,7 +1167,7 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
 {
     return _isSortable &&
     ([self.valueClass isSubclassOfClass:[NSArray class]] ||
-    [self.valueClass isSubclassOfClass:[NSOrderedSet class]]);
+     [self.valueClass isSubclassOfClass:[NSOrderedSet class]]);
 }
 
 #pragma mark -
@@ -1329,7 +1330,7 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
     {
         index = (index == 0)? NSNotFound: index - 1;
     }
-
+    
     id option = (index == NSNotFound)? nil: self.options[index];
     if ([self isCollectionType])
     {
@@ -1518,7 +1519,7 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
         NSIndexPath *indexPath = [tableView indexPathForCell:cell];
         FXFormSection *section = formController.sections[indexPath.section];
         [section addNewField];
-
+        
         [tableView deselectRowAtIndexPath:indexPath animated:YES];
         [tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
         
@@ -1635,7 +1636,7 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
 {
     NSMutableDictionary *field = self.fields[index1];
     [self.fields removeObjectAtIndex:index1];
-
+    
     id value = self.values[index1];
     [self.values removeObjectAtIndex:index1];
     
@@ -1829,6 +1830,7 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
 {
     if ((self = [super init]))
     {
+        _cellsCache = [[NSCache alloc] init];
         _cellHeightCache = [NSMutableDictionary dictionary];
         _cellClassesForFieldTypes = [@{FXFormFieldTypeDefault: [FXFormDefaultCell class],
                                        FXFormFieldTypeText: [FXFormTextFieldCell class],
@@ -2003,6 +2005,7 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
 - (void)setForm:(id<FXForm>)form
 {
     _form = form;
+    [_cellsCache removeAllObjects];
     self.sections = [FXFormSection sectionsWithForm:form controller:self];
 }
 
@@ -2116,6 +2119,10 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
 
 - (UITableViewCell *)cellForField:(FXFormField *)field
 {
+    UITableViewCell *cell = [_cellsCache objectForKey:field.key];
+    if (cell && self.cacheCells) {
+        return cell;
+    }
     //don't recycle cells - it would make things complicated
     Class cellClass = field.cellClass ?: [self cellClassForField:field];
     NSString *nibName = NSStringFromClass(cellClass);
@@ -2125,7 +2132,7 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
     if ([[NSBundle mainBundle] pathForResource:nibName ofType:@"nib"])
     {
         //load cell from nib
-        return [[[NSBundle mainBundle] loadNibNamed:nibName owner:nil options:nil] firstObject];
+        cell = [[[NSBundle mainBundle] loadNibNamed:nibName owner:nil options:nil] firstObject];
     }
     else
     {
@@ -2139,10 +2146,12 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
         {
             style = UITableViewCellStyleValue1;
         }
-
+        
         //don't recycle cells - it would make things complicated
-        return [[cellClass alloc] initWithStyle:style reuseIdentifier:NSStringFromClass(cellClass)];
+        cell = [[cellClass alloc] initWithStyle:style reuseIdentifier:NSStringFromClass(cellClass)];
     }
+    [_cellsCache setObject:cell forKey:field.key];
+    return cell;
 }
 
 - (CGFloat)tableView:(__unused UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -2153,7 +2162,7 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
     {
         return [cellClass heightForField:field width:self.tableView.frame.size.width];
     }
-
+    
     NSString *className = NSStringFromClass(cellClass);
     NSNumber *cachedHeight = _cellHeightCache[className];
     if (!cachedHeight)
@@ -2162,7 +2171,7 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
         cachedHeight = @(cell.bounds.size.height);
         _cellHeightCache[className] = cachedHeight;
     }
-
+    
     return [cachedHeight floatValue];
 }
 
@@ -2290,14 +2299,16 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
 - (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
 {
     FXFormField *field = [self fieldForIndexPath:indexPath];
-
+    
     //configure cell before setting field (in case it affects how value is displayed)
     [field.cellConfig enumerateKeysAndObjectsUsingBlock:^(NSString *keyPath, id value, __unused BOOL *stop) {
         [cell setValue:value forKeyPath:keyPath];
     }];
     
     //set form field
-    ((id<FXFormFieldCell>)cell).field = field;
+    if (!((id<FXFormFieldCell>)cell).field) {
+        ((id<FXFormFieldCell>)cell).field = field;
+    }
     
     //configure cell after setting field as well (not ideal, but allows overriding keyboard attributes, etc)
     [field.cellConfig enumerateKeysAndObjectsUsingBlock:^(NSString *keyPath, id value, __unused BOOL *stop) {
@@ -2874,7 +2885,7 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
                          @"textField.enablesReturnKeyAutomatically": ^(UITextField *f, NSInteger v){ f.enablesReturnKeyAutomatically = !!v; },
                          @"textField.secureTextEntry": ^(UITextField *f, NSInteger v){ f.secureTextEntry = !!v; }};
     });
-
+    
     void (^block)(UITextField *f, NSInteger v) = specialCases[keyPath];
     if (block)
     {
@@ -3019,7 +3030,7 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
 - (void)textFieldDidEndEditing:(__unused UITextField *)textField
 {
     [self updateFieldValue];
-
+    
     if (self.field.action) self.field.action(self);
 }
 

@@ -144,6 +144,7 @@ UIKIT_EXTERN NSString *const FXFormFieldTypeImage; //image
 @property (nonatomic, strong) FXFormController *parentFormController;
 @property (nonatomic, weak) id<FXFormControllerDelegate> delegate;
 @property (nonatomic, strong) id<FXForm> form;
+@property (nonatomic, assign) BOOL cacheCells;
 
 - (NSUInteger)numberOfSections;
 - (NSUInteger)numberOfFieldsInSection:(NSUInteger)section;
