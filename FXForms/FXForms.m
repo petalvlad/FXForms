@@ -2797,6 +2797,7 @@ static void FXFormPreprocessFieldDictionary(NSMutableDictionary *dictionary)
     }
     else if ([self.field isSubform])
     {
+        [self.field.formController.cellsCache removeObjectForKey:self.field.key];
         [FXFormsFirstResponder(tableView) resignFirstResponder];
         UIViewController *subcontroller = nil;
         if ([self.field.valueClass isSubclassOfClass:[UIViewController class]])
